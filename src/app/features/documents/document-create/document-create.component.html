@@ -1,0 +1,80 @@
+<h2 class="page-title">Создание нового документа</h2>
+
+<div class="card">
+  <div class="card-body p-4">
+    <form (ngSubmit)="createDocument()">
+
+      <div class="row">
+        <div class="col-md-8">
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Название документа</label>
+            <input type="text" 
+                   class="form-control form-control-lg" 
+                   [(ngModel)]="documentData.title" 
+                   name="title"
+                   placeholder="Введите название документа"
+                   required>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Дата документа</label>
+            <input type="date" 
+                   class="form-control" 
+                   [(ngModel)]="documentData.documentDate"
+                   name="documentDate">
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Описание</label>
+        <textarea class="form-control" 
+                  rows="4"
+                  [(ngModel)]="documentData.description"
+                  name="description"
+                  placeholder="Краткое описание..."></textarea>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-4">
+          <label class="form-label fw-semibold">Срок действия</label>
+          <input type="date" 
+                 class="form-control" 
+                 [(ngModel)]="documentData.expiryDate"
+                 name="expiryDate">
+        </div>
+        <div class="col-md-6 mb-4">
+          <label class="form-label fw-semibold">Ключевые слова</label>
+          <input type="text" 
+                 class="form-control" 
+                 [(ngModel)]="documentData.keywords"
+                 name="keywords"
+                 placeholder="договор, поставка, клиент">
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Файл документа</label>
+        <input type="file" 
+               class="form-control form-control-lg" 
+               (change)="onFileSelected($event)"
+               required>
+      </div>
+
+      <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+        <button type="button" 
+                class="btn btn-secondary px-5"
+                routerLink="/documents">
+          Отмена
+        </button>
+        <button type="submit" 
+                class="btn btn-success px-5"
+                [disabled]="isSubmitting || !selectedFile">
+          <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+          {{ isSubmitting ? 'Создание...' : 'Создать документ' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

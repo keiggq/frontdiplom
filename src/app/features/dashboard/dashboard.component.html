@@ -1,0 +1,116 @@
+<h1 class="page-title">Добро пожаловать в DocFlow</h1>
+
+<div class="row g-4">
+  <!-- Статистика -->
+  <div class="col-xl-3 col-md-6">
+    <div class="card stat-card bg-primary text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h6 class="opacity-75">Всего документов</h6>
+            <h2 class="mb-0 fw-bold">{{ totalDocuments }}</h2>
+          </div>
+          <i class="bi bi-file-earmark-text fs-1 opacity-75"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6">
+    <div class="card stat-card bg-info text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h6 class="opacity-75">Всего задач</h6>
+            <h2 class="mb-0 fw-bold">{{ totalTasks }}</h2>
+          </div>
+          <i class="bi bi-check2-circle fs-1 opacity-75"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6">
+    <div class="card stat-card bg-danger text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h6 class="opacity-75">Просроченные задачи</h6>
+            <h2 class="mb-0 fw-bold">{{ overdueTasks.length }}</h2>
+          </div>
+          <i class="bi bi-exclamation-triangle fs-1 opacity-75"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6">
+    <div class="card stat-card bg-warning text-white">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h6 class="opacity-75">Истекает скоро</h6>
+            <h2 class="mb-0 fw-bold">{{ expiringDocuments.length }}</h2>
+          </div>
+          <i class="bi bi-clock fs-1 opacity-75"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-5 g-4">
+  <!-- Просроченные задачи -->
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+        <strong>Просроченные задачи</strong>
+        <span class="badge bg-white text-danger">{{ overdueTasks.length }}</span>
+      </div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          <li *ngFor="let task of overdueTasks" class="list-group-item">
+            <div class="d-flex justify-content-between">
+              <div>
+                <strong>{{ task.title }}</strong>
+                <div class="text-muted small">{{ task.assigneeName }}</div>
+              </div>
+              <span class="text-danger fw-medium">{{ task.dueDate | date:'dd.MM.yyyy' }}</span>
+            </div>
+          </li>
+          <li *ngIf="overdueTasks.length === 0" class="list-group-item text-center text-muted py-4">
+            Просроченных задач нет — отличная работа!
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Последние комментарии -->
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header bg-primary text-white">
+        <strong>Последние комментарии</strong>
+      </div>
+      <div class="card-body p-0">
+        <div *ngFor="let comment of recentComments" class="p-3 border-bottom">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <strong>{{ comment.authorName }}</strong>
+              <span *ngIf="comment.authorPosition" class="text-muted ms-2">
+                {{ comment.authorPosition }}
+              </span>
+            </div>
+            <small class="text-muted">{{ comment.createdAt | date:'dd.MM.yyyy HH:mm' }}</small>
+          </div>
+          
+          <p class="mt-2 mb-1">{{ comment.content | slice:0:120 }}{{ comment.content.length > 120 ? '...' : '' }}</p>
+          
+          <small class="text-muted">
+            К документу: {{ comment.documentTitle }}
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,107 @@
+<div *ngIf="isLoading" class="text-center py-5">
+  <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+  <p class="mt-3 text-muted">Загрузка документа...</p>
+</div>
+
+<div *ngIf="!isLoading && document" class="row">
+  <div class="col-12 mb-3">
+    <!-- Кнопка Назад -->
+    <button class="btn btn-outline-secondary mb-3" (click)="goBack()">
+      <i class="bi bi-arrow-left me-2"></i>
+      Назад к списку документов
+    </button>
+  </div>
+
+  <div class="col-lg-8">
+    <!-- Основная карточка документа -->
+    <div class="card mb-4">
+      <div class="card-header bg-white border-bottom-0 pt-4">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h2 class="mb-1">{{ document.title }}</h2>
+            <p class="text-muted mb-0">№ {{ document.registrationNumber }}</p>
+          </div>
+          <span class="badge fs-6" [ngClass]="getStatusClass(document.status)">
+            {{ document.status }}
+          </span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <strong>Автор:</strong> {{ document.authorName }}<br>
+            <strong>Дата создания:</strong> {{ document.creationDate | date:'dd.MM.yyyy' }}
+          </div>
+          <div class="col-md-6">
+            <strong>Срок действия:</strong> 
+            <span [class.text-danger]="document.expiryDate && document.expiryDate < today">
+              {{ document.expiryDate ? (document.expiryDate | date:'dd.MM.yyyy') : 'Не указан' }}
+            </span><br>
+            <strong>Тип:</strong> {{ document.documentTypeName || '—' }}
+          </div>
+        </div>
+
+        <div *ngIf="document.description" class="mb-4">
+          <strong>Описание:</strong>
+          <p class="mt-2">{{ document.description }}</p>
+        </div>
+
+        <button class="btn btn-success btn-lg" (click)="downloadFile()">
+          <i class="bi bi-download me-2"></i> Скачать файл ({{ document.fileName }})
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Блок комментариев -->
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header bg-white">
+        <strong>Комментарии ({{ comments.length }})</strong>
+      </div>
+      <div class="card-body p-0">
+        <!-- Форма добавления комментария -->
+        <div class="p-3 border-bottom">
+          <textarea class="form-control" rows="3" 
+                    [(ngModel)]="newCommentContent"
+                    placeholder="Напишите комментарий..."></textarea>
+          <button class="btn btn-primary mt-2 w-100" 
+                  (click)="addComment()"
+                  [disabled]="!newCommentContent.trim()">
+            Добавить комментарий
+          </button>
+        </div>
+
+        <!-- Список комментариев -->
+        <div class="comment-list p-3" style="max-height: 650px; overflow-y: auto;">
+          <div *ngFor="let comment of comments" class="mb-4 pb-3 border-bottom last:border-none">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="d-flex align-items-center gap-3">
+                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" 
+                     style="width: 42px; height: 42px;">
+                  <i class="bi bi-person-fill text-primary fs-5"></i>
+                </div>
+                <div>
+                  <strong class="d-block">{{ comment.authorName }}</strong>
+                  <small class="text-muted">
+                    {{ comment.authorPosition || 'Должность не указана' }}
+                  </small>
+                </div>
+              </div>
+              <small class="text-muted text-end">
+                {{ comment.createdAt | date:'dd.MM.yyyy HH:mm' }}
+              </small>
+            </div>
+            <div class="mt-3 ps-5">
+              <p class="mb-0 text-dark">{{ comment.content }}</p>
+            </div>
+          </div>
+
+          <div *ngIf="comments.length === 0" class="text-center text-muted py-5">
+            Комментариев пока нет. Будьте первым!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

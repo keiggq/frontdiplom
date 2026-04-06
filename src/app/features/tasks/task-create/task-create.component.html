@@ -1,0 +1,82 @@
+<h2 class="page-title">Создание новой задачи</h2>
+
+<div class="card">
+  <div class="card-body p-4">
+    <form (ngSubmit)="createTask()">
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Название задачи</label>
+        <input type="text" 
+               class="form-control form-control-lg" 
+               [(ngModel)]="task.title" 
+               name="title"
+               placeholder="Введите название задачи"
+               required>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Описание</label>
+        <textarea class="form-control" 
+                  rows="4"
+                  [(ngModel)]="task.description"
+                  name="description"
+                  placeholder="Подробное описание задачи"></textarea>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4 mb-4">
+          <label class="form-label fw-semibold">Приоритет</label>
+          <select class="form-select form-select-lg" 
+                  [(ngModel)]="task.priority"
+                  name="priority">
+            <option value="HIGH">🔴 Высокий</option>
+            <option value="MEDIUM">🟡 Средний</option>
+            <option value="LOW">🟢 Низкий</option>
+          </select>
+        </div>
+
+        <div class="col-md-4 mb-4">
+          <label class="form-label fw-semibold">Срок выполнения</label>
+          <input type="date" 
+                 class="form-control form-control-lg" 
+                 [(ngModel)]="task.dueDate"
+                 name="dueDate"
+                 required>
+        </div>
+
+        <div class="col-md-4 mb-4">
+          <label class="form-label fw-semibold">Исполнитель (ID)</label>
+          <input type="number" 
+                 class="form-control form-control-lg" 
+                 [(ngModel)]="task.assigneeId"
+                 name="assigneeId"
+                 placeholder="ID пользователя"
+                 required>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Связанный документ (ID)</label>
+        <input type="number" 
+               class="form-control" 
+               [(ngModel)]="task.documentId"
+               name="documentId"
+               placeholder="Оставьте пустым, если не связано">
+      </div>
+
+      <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+        <button type="button" 
+                class="btn btn-secondary px-5"
+                routerLink="/tasks">
+          Отмена
+        </button>
+        <button type="submit" 
+                class="btn btn-success px-5"
+                [disabled]="isSubmitting">
+          <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+          {{ isSubmitting ? 'Создание...' : 'Создать задачу' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
