@@ -34,7 +34,17 @@ export class TaskCreateComponent implements OnInit {
   ngOnInit() {
     const userId = this.authService.getCurrentUserId();
     if (userId) {
-      this.task.creatorId = userId;   // автоматически ставим создателя
+      this.task.creatorId = userId;
+    }
+
+    // Проверка: если не админ — перенаправляем обратно
+    if (!this.authService.isAdmin()) {
+      Swal.fire({
+        title: 'Доступ запрещён',
+        text: 'Создавать задачи может только администратор',
+        icon: 'error'
+      });
+      this.router.navigate(['/tasks']);
     }
   }
 

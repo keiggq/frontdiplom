@@ -8,7 +8,9 @@ const API_TASKS = 'http://localhost:8080/api/tasks';
 export class TaskService {
 
   constructor(private http: HttpClient) {}
-
+  getMyTasks() {
+    return this.http.get<any>('http://localhost:8080/api/tasks/my');
+  }
   getAll() {
     return this.http.get<TaskDto[]>(API_TASKS);
   }

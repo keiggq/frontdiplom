@@ -73,7 +73,8 @@ export class AuthService {
   }
 
   isAdmin(): boolean {
-    return this.currentRole() === 'ROLE_ADMIN';
+    const user = this.currentUserSubject.value;
+    return user ? (user.role === 'ADMIN' || user.role === 'ROLE_ADMIN') : false;
   }
   getCurrentUserId(): number | null {
     const user = this.currentUserSubject.value;
