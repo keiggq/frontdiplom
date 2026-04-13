@@ -1,0 +1,64 @@
+<div class="container-fluid mt-4">
+  <button class="btn btn-outline-secondary mb-4" (click)="goBack()">
+    <i class="bi bi-arrow-left me-2"></i>
+    Назад к задачам
+  </button>
+
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+  </div>
+
+  <div *ngIf="!isLoading && task" class="row">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header bg-white">
+          <h3 class="mb-0">{{ task.title }}</h3>
+        </div>
+        <div class="card-body">
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <strong>Исполнитель:</strong> {{ task.assigneeName }}<br>
+              <strong>Создатель:</strong> {{ task.creatorName }}
+            </div>
+            <div class="col-md-6">
+              <strong>Срок выполнения:</strong> 
+              <span [class.text-danger]="task.dueDate && task.dueDate < today">
+                {{ task.dueDate | date:'dd.MM.yyyy' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <strong>Описание задачи:</strong>
+            <p class="mt-2 border p-3 rounded">{{ task.description || 'Описание отсутствует' }}</p>
+          </div>
+
+          <div *ngIf="task.documentId" class="mb-4">
+            <strong>Прикреплённый документ:</strong>
+            <a href="javascript:void(0)" 
+               class="d-block mt-2 text-primary text-decoration-none"
+               (click)="openDocument(task.documentId)">
+              📄 {{ task.documentTitle }}
+            </a>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <strong>Статус исполнителя:</strong><br>
+              <span class="badge fs-6" [ngClass]="getExecutorStatusClass(task.status)">
+                {{ getExecutorStatusName(task.status) }}
+              </span>
+            </div>
+            <div class="col-md-6">
+              <strong>Статус администратора:</strong><br>
+              <span *ngIf="task.adminStatus" class="badge fs-6" [ngClass]="getAdminStatusClass(task.adminStatus)">
+                {{ getAdminStatusName(task.adminStatus) }}
+              </span>
+              <span *ngIf="!task.adminStatus" class="text-muted">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

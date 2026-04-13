@@ -11,6 +11,10 @@ export class TaskService {
   getMyTasks() {
     return this.http.get<any>('http://localhost:8080/api/tasks/my');
   }
+    // Получить задачу по ID
+  getById(id: number) {
+    return this.http.get<TaskDto>(`${API_TASKS}/${id}`);
+  }
   getAll() {
     return this.http.get<TaskDto[]>(API_TASKS);
   }

@@ -12,6 +12,7 @@ import { DocumentDetailComponent } from './features/documents/document-detail/do
 import { TaskListComponent } from './features/tasks/task-list/task-list.component';
 import { TaskCreateComponent } from './features/tasks/task-create/task-create.component';
 import { CommentListComponent } from './features/comments/comment-list/comment-list.component';
+import { TaskDetailComponent } from './features/tasks/task-detail/task-detail.component';
 
 export const routes: Routes = [
   // Публичные маршруты (без layout)
@@ -35,6 +36,7 @@ export const routes: Routes = [
       // Задачи
       { path: 'tasks', component: TaskListComponent },
       { path: 'tasks/new', component: TaskCreateComponent },
+      { path: 'tasks/:id', component: TaskDetailComponent },
       
       // Комментарии
       { path: 'comments', component: CommentListComponent }

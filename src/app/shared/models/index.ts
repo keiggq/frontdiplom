@@ -52,6 +52,7 @@ export interface TaskDto {
   priority: string;
   dueDate: string;
   completedDate?: string;
+  adminStatus?: string;
   assigneeName: string;
   assigneeId: number;
   creatorName: string;

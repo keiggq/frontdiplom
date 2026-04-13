@@ -20,6 +20,7 @@ export class CommentListComponent implements OnInit {
   newCommentContent: string = '';
   selectedDocumentId: number | null = null;
   isSubmitting = false;
+  isAdmin = false;
   currentUserId: number = 0;
 
   constructor(
@@ -27,9 +28,11 @@ export class CommentListComponent implements OnInit {
     private documentService: DocumentService,
     private authService: AuthService
   ) {
-    // Получаем ID текущего пользователя
     this.authService.currentUser$.subscribe(user => {
-      if (user) this.currentUserId = user.id;
+      if (user) {
+        this.currentUserId = user.id;
+        this.isAdmin = user.role === 'ADMIN' || user.role === 'ROLE_ADMIN';
+      }
     });
   }
 
@@ -50,13 +53,13 @@ export class CommentListComponent implements OnInit {
       next: (data) => {
         this.documents = Array.isArray(data) ? data : (data.content || []);
       },
-      error: (err) => console.error('Ошибка загрузки документов', err)
+      error: (err) => console.error(err)
     });
   }
 
   addComment() {
     if (!this.newCommentContent.trim() || !this.selectedDocumentId) {
-      Swal.fire('Ошибка', 'Выберите документ и введите текст комментария', 'warning');
+      Swal.fire('Ошибка', 'Выберите документ и введите комментарий', 'warning');
       return;
     }
 
@@ -82,16 +85,18 @@ export class CommentListComponent implements OnInit {
     });
   }
 
-  // Удаление комментария (только своего)
+  // Удаление комментария
   deleteComment(commentId: number, authorId: number) {
-    if (authorId !== this.currentUserId) {
+    // Админ может удалять любой комментарий
+    // Обычный пользователь — только свой
+    if (!this.isAdmin && authorId !== this.currentUserId) {
       Swal.fire('Ошибка', 'Вы можете удалить только свои комментарии', 'error');
       return;
     }
 
     Swal.fire({
-      title: 'Вы уверены?',
-      text: 'Комментарий будет удалён без возможности восстановления',
+      title: 'Удалить комментарий?',
+      text: 'Это действие нельзя отменить',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Да, удалить',
