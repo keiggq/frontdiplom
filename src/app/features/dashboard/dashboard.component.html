@@ -1,114 +1,141 @@
-<h1 class="page-title">Добро пожаловать в DocFlow</h1>
-
-<div class="row g-4">
-  <!-- Статистика -->
-  <div class="col-xl-3 col-md-6">
-    <div class="card stat-card bg-primary text-white">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start">
-          <div>
-            <h6 class="opacity-75">Всего документов</h6>
-            <h2 class="mb-0 fw-bold">{{ totalDocuments }}</h2>
-          </div>
-          <i class="bi bi-file-earmark-text fs-1 opacity-75"></i>
-        </div>
-      </div>
+<div class="container-fluid mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+      <h1 class="display-5 fw-bold mb-1">Добро пожаловать, {{ currentUserName }}!</h1>
+      <p class="text-muted fs-5">Вот обзор вашей деятельности на сегодня</p>
+    </div>
+    <div class="text-end">
+      <small class="text-muted d-block">Сегодня</small>
+      <h5 class="mb-0 text-primary fw-semibold">{{ today | date:'dd MMMM yyyy' }}</h5>
     </div>
   </div>
 
-  <div class="col-xl-3 col-md-6">
-    <div class="card stat-card bg-info text-white">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start">
-          <div>
-            <h6 class="opacity-75">Всего задач</h6>
-            <h2 class="mb-0 fw-bold">{{ totalTasks }}</h2>
-          </div>
-          <i class="bi bi-check2-circle fs-1 opacity-75"></i>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-xl-3 col-md-6">
-    <div class="card stat-card bg-danger text-white">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start">
-          <div>
-            <h6 class="opacity-75">Просроченные задачи</h6>
-            <h2 class="mb-0 fw-bold">{{ overdueTasks.length }}</h2>
-          </div>
-          <i class="bi bi-exclamation-triangle fs-1 opacity-75"></i>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-xl-3 col-md-6">
-    <div class="card stat-card bg-warning text-white">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start">
-          <div>
-            <h6 class="opacity-75">Истекает скоро</h6>
-            <h2 class="mb-0 fw-bold">{{ expiringDocuments.length }}</h2>
-          </div>
-          <i class="bi bi-clock fs-1 opacity-75"></i>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="row mt-5 g-4">
-  <!-- Просроченные задачи -->
-  <div class="col-lg-6">
-    <div class="card h-100">
-      <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
-        <strong>Просроченные задачи</strong>
-        <span class="badge bg-white text-danger">{{ overdueTasks.length }}</span>
-      </div>
-      <div class="card-body p-0">
-        <ul class="list-group list-group-flush">
-          <li *ngFor="let task of overdueTasks" class="list-group-item">
-            <div class="d-flex justify-content-between">
-              <div>
-                <strong>{{ task.title }}</strong>
-                <div class="text-muted small">{{ task.assigneeName }}</div>
-              </div>
-              <span class="text-danger fw-medium">{{ task.dueDate | date:'dd.MM.yyyy' }}</span>
-            </div>
-          </li>
-          <li *ngIf="overdueTasks.length === 0" class="list-group-item text-center text-muted py-4">
-            Просроченных задач нет — отличная работа!
-          </li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <!-- Последние комментарии -->
-  <div class="col-lg-6">
-    <div class="card h-100">
-      <div class="card-header bg-primary text-white">
-        <strong>Последние комментарии</strong>
-      </div>
-      <div class="card-body p-0">
-        <div *ngFor="let comment of recentComments" class="p-3 border-bottom">
-          <div class="d-flex justify-content-between align-items-start">
+  <!-- Улучшенные карточки статистики -->
+  <div class="row g-4 mb-5">
+    <div class="col-xl-3 col-md-6">
+      <div class="card stats-card h-100">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center justify-content-between">
             <div>
-              <strong>{{ comment.authorName }}</strong>
-              <span *ngIf="comment.authorPosition" class="text-muted ms-2">
-                {{ comment.authorPosition }}
-              </span>
+              <p class="text-muted mb-2">Всего документов</p>
+              <h2 class="fw-bold mb-0 text-primary">{{ totalDocuments }}</h2>
             </div>
-            <small class="text-muted">{{ comment.createdAt | date:'dd.MM.yyyy HH:mm' }}</small>
+            <div class="stats-icon bg-primary bg-opacity-10">
+              <i class="bi bi-file-earmark-text fs-1 text-primary"></i>
+            </div>
           </div>
-          
-          <p class="mt-2 mb-1">{{ comment.content | slice:0:120 }}{{ comment.content.length > 120 ? '...' : '' }}</p>
-          
-          <small class="text-muted">
-            К документу: {{ comment.documentTitle }}
-          </small>
+          <div class="mt-4 pt-3 border-top d-flex align-items-center gap-2">
+            <span class="text-success small fw-medium">
+              <i class="bi bi-arrow-up-short"></i> +{{ documentsGrowth }}
+            </span>
+            <span class="text-muted small">за месяц</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="card stats-card h-100">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <p class="text-muted mb-2">Активные задачи</p>
+              <h2 class="fw-bold mb-0 text-amber-600">{{ activeTasks }}</h2>
+            </div>
+            <div class="stats-icon bg-amber-100">
+              <i class="bi bi-list-task fs-1 text-amber-600"></i>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-top">
+            <span class="text-red-600 small fw-medium">
+              Просрочено: {{ overdueTasks }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="card stats-card h-100">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <p class="text-muted mb-2">На согласовании</p>
+              <h2 class="fw-bold mb-0 text-sky-600">{{ documentsUnderReview }}</h2>
+            </div>
+            <div class="stats-icon bg-sky-100">
+              <i class="bi bi-hourglass-split fs-1 text-sky-600"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+      <div class="card stats-card h-100">
+        <div class="card-body p-4">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <p class="text-muted mb-2">Завершено за месяц</p>
+              <h2 class="fw-bold mb-0 text-emerald-600">{{ completedThisMonth }}</h2>
+            </div>
+            <div class="stats-icon bg-emerald-100">
+              <i class="bi bi-check2-circle fs-1 text-emerald-600"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Нижняя часть -->
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card h-100">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Мои активные задачи</h5>
+          <a routerLink="/tasks" class="btn btn-sm btn-outline-primary">Все задачи</a>
+        </div>
+        <div class="card-body p-0">
+          <div class="list-group list-group-flush">
+            <a *ngFor="let task of myActiveTasks" [routerLink]="['/tasks', task.id]" 
+               class="list-group-item list-group-item-action">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="fw-semibold">{{ task.title }}</div>
+                  <small class="text-muted">Срок: {{ task.dueDate | date:'dd.MM.yyyy' }}</small>
+                </div>
+                <span class="badge" [ngClass]="getPriorityClass(task.priority)">
+                  {{ task.priority }}
+                </span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card h-100">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Последние документы</h5>
+          <a routerLink="/documents" class="btn btn-sm btn-outline-primary">Все документы</a>
+        </div>
+        <div class="card-body p-0">
+          <div class="list-group list-group-flush">
+            <a *ngFor="let doc of recentDocuments" [routerLink]="['/documents', doc.id]" 
+               class="list-group-item list-group-item-action">
+              <div class="d-flex justify-content-between">
+                <div>
+                  <div class="fw-semibold">{{ doc.title }}</div>
+                  <small class="text-muted">{{ doc.registrationNumber }}</small>
+                </div>
+                <span class="badge" [ngClass]="getStatusClass(doc.status)">
+                  {{ getStatusName(doc.status) }}
+                </span>
+              </div>
+            </a>
+          </div>
         </div>
       </div>
     </div>

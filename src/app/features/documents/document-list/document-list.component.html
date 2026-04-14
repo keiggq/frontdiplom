@@ -1,66 +1,77 @@
 <h2 class="page-title">📄 Документы</h2>
 
-<!-- Горизонтальные вкладки (кнопки) -->
-<div class="d-flex flex-wrap gap-2 mb-4">
-  <button class="btn" 
-          [class.btn-primary]="activeTab === 'all'" 
-          (click)="setTab('all')">
-    Все документы
-  </button>
-  <button class="btn" 
-          [class.btn-primary]="activeTab === 'DRAFT'" 
-          (click)="setTab('DRAFT')">
-    Черновик
-  </button>
-  <button class="btn" 
-          [class.btn-primary]="activeTab === 'CREATED'" 
-          (click)="setTab('CREATED')">
-    Создан
-  </button>
-  <button class="btn" 
-          [class.btn-primary]="activeTab === 'UNDER_REVIEW'" 
-          (click)="setTab('UNDER_REVIEW')">
-    На рассмотрении
-  </button>
-  <button class="btn" 
-          [class.btn-primary]="activeTab === 'APPROVED'" 
-          (click)="setTab('APPROVED')">
-    Утвержден
-  </button>
-  <button class="btn" 
-          [class.btn-primary]="activeTab === 'REJECTED'" 
-          (click)="setTab('REJECTED')">
-    Отклонен
-  </button>
-  <button class="btn" 
-          [class.btn-primary]="activeTab === 'ARCHIVED'" 
-          (click)="setTab('ARCHIVED')">
-    В архиве
-  </button>
-  <button class="btn" 
-          [class.btn-primary]="activeTab === 'EXPIRED'" 
-          (click)="setTab('EXPIRED')">
-    Просрочен
-  </button>
-</div>
-
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <div class="input-group" style="max-width: 420px;">
-    <input type="text" 
-           class="form-control" 
-           placeholder="Поиск по названию или номеру..." 
-           [(ngModel)]="searchTerm"
-           (keyup.enter)="search()">
-    <button class="btn btn-primary" (click)="search()">
-      <i class="bi bi-search"></i>
+<div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+  
+  <!-- Горизонтальные вкладки в стиле pills -->
+  <div class="d-flex flex-wrap gap-2" role="group">
+    <button class="btn btn-sm rounded-pill px-3" 
+            [class.btn-primary]="activeTab === 'all'" 
+            [class.btn-outline-secondary]="activeTab !== 'all'"
+            (click)="setTab('all')">
+      Все
+    </button>
+    <button class="btn btn-sm rounded-pill px-3" 
+            [class.btn-primary]="activeTab === 'DRAFT'" 
+            [class.btn-outline-secondary]="activeTab !== 'DRAFT'"
+            (click)="setTab('DRAFT')">
+      Черновик
+    </button>
+    <button class="btn btn-sm rounded-pill px-3" 
+            [class.btn-primary]="activeTab === 'CREATED'" 
+            [class.btn-outline-secondary]="activeTab !== 'CREATED'"
+            (click)="setTab('CREATED')">
+      Создан
+    </button>
+    <button class="btn btn-sm rounded-pill px-3" 
+            [class.btn-primary]="activeTab === 'UNDER_REVIEW'" 
+            [class.btn-outline-secondary]="activeTab !== 'UNDER_REVIEW'"
+            (click)="setTab('UNDER_REVIEW')">
+      На рассмотрении
+    </button>
+    <button class="btn btn-sm rounded-pill px-3" 
+            [class.btn-primary]="activeTab === 'APPROVED'" 
+            [class.btn-outline-secondary]="activeTab !== 'APPROVED'"
+            (click)="setTab('APPROVED')">
+      Утвержден
+    </button>
+    <button class="btn btn-sm rounded-pill px-3" 
+            [class.btn-primary]="activeTab === 'REJECTED'" 
+            [class.btn-outline-secondary]="activeTab !== 'REJECTED'"
+            (click)="setTab('REJECTED')">
+      Отклонен
+    </button>
+    <button class="btn btn-sm rounded-pill px-3" 
+            [class.btn-primary]="activeTab === 'ARCHIVED'" 
+            [class.btn-outline-secondary]="activeTab !== 'ARCHIVED'"
+            (click)="setTab('ARCHIVED')">
+      В архиве
+    </button>
+    <button class="btn btn-sm rounded-pill px-3" 
+            [class.btn-primary]="activeTab === 'EXPIRED'" 
+            [class.btn-outline-secondary]="activeTab !== 'EXPIRED'"
+            (click)="setTab('EXPIRED')">
+      Просрочен
     </button>
   </div>
 
-  <!-- Кнопка "Новый документ" видна всем пользователям -->
-  <a routerLink="/documents/new" class="btn btn-success d-flex align-items-center gap-2">
-    <i class="bi bi-plus-lg"></i>
-    Новый документ
-  </a>
+  <!-- Поиск + Кнопка "Новый документ" -->
+  <div class="ms-auto d-flex gap-3 align-items-center">
+    <div class="input-group" style="width: 320px;">
+      <input type="text" 
+             class="form-control" 
+             placeholder="Поиск по названию или номеру..." 
+             [(ngModel)]="searchTerm"
+             (keyup.enter)="search()">
+      <button class="btn btn-primary" (click)="search()">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+
+    <a routerLink="/documents/new" class="btn btn-success d-flex align-items-center gap-2">
+      <i class="bi bi-plus-lg"></i>
+      Новый документ
+    </a>
+  </div>
 </div>
 
 <div class="card">
@@ -78,7 +89,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let doc of getFilteredDocuments()">
+        <tr *ngFor="let doc of getFilteredDocuments(); let i = index" 
+            style="--row-index: {{ i }};">
           <td><strong class="text-primary">{{ doc.registrationNumber }}</strong></td>
           <td class="fw-medium">{{ doc.title }}</td>
           <td>{{ doc.authorName }}</td>

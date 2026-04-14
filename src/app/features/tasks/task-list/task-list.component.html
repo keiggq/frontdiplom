@@ -1,7 +1,5 @@
 <h2 class="page-title">✅ Задачи</h2>
-
-<!-- Фильтры по приоритету и дате -->
-<!-- Сортировка -->
+<!-- Блок сортировки -->
 <div class="d-flex gap-3 mb-4">
   <div>
     <label class="form-label small text-muted">Сортировать по</label>
@@ -19,64 +17,47 @@
     </div>
   </div>
 
-  <div>
-    <label class="form-label small text-muted">Направление</label>
-    <button class="btn btn-sm" (click)="sortDirection = sortDirection === 'desc' ? 'asc' : 'desc'">
-      {{ sortDirection === 'desc' ? '↓ По убыванию' : '↑ По возрастанию' }}
-    </button>
-  </div>
+  <button class="btn btn-sm btn-outline-secondary" 
+          (click)="sortDirection = sortDirection === 'desc' ? 'asc' : 'desc'">
+    {{ sortDirection === 'desc' ? '↓ По убыванию' : '↑ По возрастанию' }}
+  </button>
 </div>
 
-<!-- Горизонтальные кнопки фильтрации для обычного пользователя -->
-<div *ngIf="!isAdmin" class="mb-4">
-  <div class="btn-group" role="group" aria-label="Фильтр задач">
-    <button type="button" 
-            class="btn" 
-            [class.btn-primary]="activeTab === 'all'"
-            [class.btn-outline-secondary]="activeTab !== 'all'"
-            (click)="setTab('all')">
-      Все задачи
-    </button>
-    <button type="button" 
-            class="btn" 
-            [class.btn-primary]="activeTab === 'in_progress'"
-            [class.btn-outline-secondary]="activeTab !== 'in_progress'"
-            (click)="setTab('in_progress')">
-      В работе
-    </button>
-    <button type="button" 
-            class="btn" 
-            [class.btn-primary]="activeTab === 'overdue'"
-            [class.btn-outline-secondary]="activeTab !== 'overdue'"
-            (click)="setTab('overdue')">
-      Просроченные
-    </button>
-    <button type="button" 
-            class="btn" 
-            [class.btn-primary]="activeTab === 'in_review'"
-            [class.btn-outline-secondary]="activeTab !== 'in_review'"
-            (click)="setTab('in_review')">
-      В обработке
-    </button>
-    <button type="button" 
-            class="btn" 
-            [class.btn-primary]="activeTab === 'revision'"
-            [class.btn-outline-secondary]="activeTab !== 'revision'"
-            (click)="setTab('revision')">
-      На доработку
-    </button>
-    <button type="button" 
-            class="btn" 
-            [class.btn-primary]="activeTab === 'agreed'"
-            [class.btn-outline-secondary]="activeTab !== 'agreed'"
-            (click)="setTab('agreed')">
-      Согласовано
-    </button>
-  </div>
+<!-- Горизонтальные вкладки -->
+<div class="d-flex flex-wrap gap-2 mb-4">
+  <button class="btn" 
+          [class.btn-primary]="activeTab === 'all'" 
+          (click)="setTab('all')">
+    Все задачи
+  </button>
+  <button class="btn" 
+          [class.btn-primary]="activeTab === 'in_progress'" 
+          (click)="setTab('in_progress')">
+    В работе
+  </button>
+  <button class="btn" 
+          [class.btn-primary]="activeTab === 'overdue'" 
+          (click)="setTab('overdue')">
+    Просроченные
+  </button>
+  <button class="btn" 
+          [class.btn-primary]="activeTab === 'in_review'" 
+          (click)="setTab('in_review')">
+    В обработке
+  </button>
+  <button class="btn" 
+          [class.btn-primary]="activeTab === 'agreed'" 
+          (click)="setTab('agreed')">
+    Согласовано
+  </button>
+  <button class="btn" 
+          [class.btn-primary]="activeTab === 'revision'" 
+          (click)="setTab('revision')">
+    На доработку
+  </button>
 </div>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-  <!-- Кнопка "Новая задача" — только для админа -->
   <a *ngIf="isAdmin" routerLink="/tasks/new" class="btn btn-success d-flex align-items-center gap-2">
     <i class="bi bi-plus-lg"></i>
     Новая задача
@@ -99,36 +80,35 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let task of getFilteredTasks()">
-          <td class="fw-medium">
-            {{ task.title }}
-           </td>
+        <tr *ngFor="let task of getFilteredTasks(); let i = index" 
+            style="--row-index: {{ i }};">
+          <td class="fw-medium">{{ task.title }}</td>
           <td>{{ task.assigneeName }}</td>
           <td>
             <span *ngIf="task.documentTitle" class="text-primary">{{ task.documentTitle }}</span>
             <span *ngIf="!task.documentTitle" class="text-muted">—</span>
-           </td>
+          </td>
           <td>
             <span class="badge" [ngClass]="getPriorityClass(task.priority)">
               {{ task.priority }}
             </span>
-           </td>
+          </td>
           <td>
             <span class="badge" [ngClass]="getExecutorStatusClass(task.status)">
               {{ getExecutorStatusName(task.status) }}
             </span>
-           </td>
+          </td>
           <td>
             <span *ngIf="task.adminStatus" class="badge" [ngClass]="getAdminStatusClass(task.adminStatus)">
               {{ getAdminStatusName(task.adminStatus) }}
             </span>
             <span *ngIf="!task.adminStatus" class="text-muted">—</span>
-           </td>
+          </td>
           <td [class.text-danger]="task.dueDate && task.dueDate < today">
             {{ task.dueDate | date:'dd.MM.yyyy' }}
-           </td>
+          </td>
           <td class="text-end">
-            <select class="form-select form-select-sm d-inline w-auto" 
+            <select class="form-select form-select-sm d-inline w-auto me-2" 
                     (change)="updateStatus(task.id, $any($event.target).value)"
                     [disabled]="!isAdmin && task.status === 'COMPLETED'">
               <option *ngIf="!isAdmin" value="NEW" [selected]="task.status === 'NEW'">Новая</option>
@@ -141,24 +121,23 @@
             </select>
 
             <button *ngIf="isAdmin" 
-                    class="btn btn-sm btn-outline-danger ms-2"
+                    class="btn btn-sm btn-outline-danger me-1"
                     (click)="deleteTask(task.id)">
               <i class="bi bi-trash"></i>
             </button>
 
-            <!-- Кнопка "Подробнее" -->
-            <button class="btn btn-sm btn-outline-primary ms-2"
+            <button class="btn btn-sm btn-outline-primary"
                     (click)="openTaskDetail(task.id)">
               Подробнее
             </button>
-           </td>
-         </tr>
+          </td>
+        </tr>
 
         <tr *ngIf="getFilteredTasks().length === 0">
-          <td colspan="7" class="text-center py-5 text-muted">
+          <td colspan="8" class="text-center py-5 text-muted">
             Задачи не найдены
-           </td>
-         </tr>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>

@@ -1,133 +1,201 @@
-/* ====================== DOCFLOW - MODERN DESIGN ====================== */
+/* ====================== DOCFLOW - IMPROVED COLOR SCHEME 2026 ====================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+:root {
+  --primary: #2563eb;
+  --primary-light: #3b82f6;
+  --success: #16a34a;
+  --warning: #ca8a04;
+  --danger: #dc2626;
+  --info: #0ea5e9;
+  --gray-100: #f8fafc;
+  --gray-200: #e2e8f0;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-900: #0f172a;
+}
+
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: #f8fafc;
-  color: #1e2937;
-  line-height: 1.6;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--gray-100);
+  color: var(--gray-900);
 }
 
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
-  color: #0f172a;
+/* Navbar */
+.navbar {
+  background: linear-gradient(135deg, #1e40af, #1e3a8a) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
 }
 
-.card {
-  border: none;
-  border-radius: 16px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 
-              0 4px 6px -4px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 
-              0 8px 10px -6px rgba(0, 0, 0, 0.08);
-}
-
-.btn {
-  border-radius: 10px;
-  font-weight: 600;
-  padding: 10px 20px;
-  transition: all 0.2s ease;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-  border: none;
-}
-
-.btn-success {
-  background: linear-gradient(135deg, #10b981, #059669);
-  border: none;
-}
-
-.btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-/* Sidebar */
 .nav-link {
-  color: #64748b;
-  padding: 12px 16px;
-  border-radius: 12px;
-  margin-bottom: 4px;
+  color: rgba(255,255,255,0.95) !important;
   font-weight: 500;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  padding: 12px 22px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
 }
 
 .nav-link:hover {
-  background-color: #f1f5f9;
-  color: #3b82f6;
+  background-color: rgba(255,255,255,0.12);
+  color: white;
 }
 
 .nav-link.active {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background-color: rgba(255,255,255,0.25);
   color: white;
   font-weight: 600;
-  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+}
+
+/* Кнопки */
+.btn {
+  border-radius: 12px;
+  font-weight: 600;
+  padding: 12px 24px;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  border: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  border: none;
+}
+
+.btn-outline-danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* Карточки */
+.card {
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
 }
 
 /* Таблицы */
-.table {
-  border-radius: 12px;
-  overflow: hidden;
-}
-
 .table thead th {
-  background-color: #f8fafc;
-  color: #64748b;
-  font-weight: 600;
+  background-color: #f1f5f9;
+  color: #475569;
+  font-weight: 700;
   text-transform: uppercase;
   font-size: 0.8rem;
-  letter-spacing: 0.5px;
-  padding: 16px 12px;
-}
-
-.table td {
-  padding: 16px 12px;
-  vertical-align: middle;
+  letter-spacing: 0.6px;
+  padding: 18px 14px;
 }
 
 /* Badge */
 .badge {
-  font-weight: 600;
-  padding: 6px 14px;
+  font-weight: 700;
+  padding: 8px 16px;
   border-radius: 9999px;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
 
 /* Формы */
 .form-control, .form-select {
-  border-radius: 10px;
-  padding: 12px 16px;
-  border: 1px solid #e2e8f0;
-  font-size: 1rem;
+  border-radius: 14px;
+  padding: 14px 18px;
+  border: 2px solid #e2e8f0;
 }
 
 .form-control:focus, .form-select:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
 }
 
-/* Заголовки страниц */
-.page-title {
-  font-size: 1.85rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 1.5rem;
+/* Улучшенные карточки статистики */
+.stats-card {
+  transition: all 0.3s ease;
 }
 
-/* Улучшение карточек статистики */
-.stat-card {
+.stats-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+.stats-icon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 16px;
-  padding: 1.5rem;
-  height: 100%;
+}
+/* ====================== АНИМАЦИИ ====================== */
+
+/* Плавное появление строк таблицы */
+.table tbody tr {
+  opacity: 0;
+  transform: translateY(15px);
+  animation: rowFadeIn 0.4s forwards;
+  animation-delay: calc(var(--row-index) * 40ms);
+}
+
+@keyframes rowFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hover эффект для строк таблицы */
+.table tbody tr {
+  transition: all 0.25s ease;
+}
+
+.table tbody tr:hover {
+  background-color: #f8fafc;
+  transform: scale(1.01);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Анимация для карточек на дашборде */
+.card {
+  animation: cardPopIn 0.5s ease forwards;
+}
+
+@keyframes cardPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Анимация для бейджей */
+.badge {
+  transition: all 0.2s ease;
+}
+
+.badge:hover {
+  transform: scale(1.08);
+}
+
+/* Плавное появление модальных окон */
+.modal.fade .modal-dialog {
+  transform: translateY(-30px);
+  transition: transform 0.3s ease-out;
+}
+
+.modal.show .modal-dialog {
+  transform: translateY(0);
 }
