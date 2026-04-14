@@ -59,6 +59,7 @@ export interface TaskDto {
   creatorId: number;
   documentId?: number;
   documentTitle?: string;
+  relatedTasks?: TaskDto[];
 }
 
 // ====================== COMMENT ======================

@@ -119,11 +119,12 @@ export class TaskListComponent implements OnInit {
   }
   
 
-  updateStatus(taskId: number, newStatus: string) {
+    updateStatus(taskId: number, newStatus: string) {
     const task = this.tasks.find(t => t.id === taskId);
     if (!task) return;
 
     if (!this.isAdmin) {
+      // Обычный пользователь
       if (task.status === 'COMPLETED') {
         Swal.fire('Задача завершена', 'Вы не можете изменить статус выполненной задачи', 'info');
         return;
@@ -145,8 +146,21 @@ export class TaskListComponent implements OnInit {
           confirmButtonColor: '#28a745'
         }).then((result) => {
           if (result.isConfirmed) {
-            this.executeUpdate(taskId, newStatus);
+            this.completeTask(taskId);
           }
+        });
+        return;
+      }
+    } 
+    else {
+      // Админ
+      if (newStatus === 'REVISION') {
+        // Админ ставит "На доработку" → у пользователя статус становится "Новая"
+        this.taskService.updateStatus(taskId, 'NEW').subscribe({
+          next: () => {
+            this.executeUpdate(taskId, newStatus);
+          },
+          error: () => this.executeUpdate(taskId, newStatus)
         });
         return;
       }
@@ -155,14 +169,22 @@ export class TaskListComponent implements OnInit {
     this.executeUpdate(taskId, newStatus);
   }
 
-  private executeUpdate(taskId: number, newStatus: string) {
-    if (!this.isAdmin && newStatus === 'COMPLETED') {
-      this.taskService.updateStatus(taskId, 'IN_REVIEW').subscribe({
-        next: () => this.loadTasks(),
-        error: () => console.error('Не удалось поставить IN_REVIEW')
-      });
-    }
+  // Специальный метод для завершения задачи пользователем
+  private completeTask(taskId: number) {
+    // Сначала ставим админу "В обработке"
+    this.taskService.updateStatus(taskId, 'IN_REVIEW').subscribe({
+      next: () => {
+        // Затем ставим пользователю "Выполнено"
+        this.taskService.updateStatus(taskId, 'COMPLETED').subscribe({
+          next: () => this.loadTasks(),
+          error: (err) => Swal.fire('Ошибка', 'Не удалось завершить задачу', 'error')
+        });
+      },
+      error: (err) => Swal.fire('Ошибка', 'Не удалось поставить "В обработке"', 'error')
+    });
+  }
 
+  private executeUpdate(taskId: number, newStatus: string) {
     this.taskService.updateStatus(taskId, newStatus).subscribe({
       next: () => this.loadTasks(),
       error: (err) => Swal.fire('Ошибка', 'Не удалось обновить статус', 'error')

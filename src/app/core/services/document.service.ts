@@ -28,5 +28,8 @@ export class DocumentService {
       responseType: 'blob' 
     });
   }
-  
+    // Обновление статуса документа
+  updateStatus(documentId: number, status: string) {
+    return this.http.patch(`${API_DOCUMENTS}/${documentId}/status?status=${status}`, {});
+  }
 }

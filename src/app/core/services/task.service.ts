@@ -15,6 +15,9 @@ export class TaskService {
   getById(id: number) {
     return this.http.get<TaskDto>(`${API_TASKS}/${id}`);
   }
+  getByDocument(documentId: number) {
+    return this.http.get<TaskDto[]>(`${API_TASKS}/document/${documentId}`);
+  }
   getAll() {
     return this.http.get<TaskDto[]>(API_TASKS);
   }

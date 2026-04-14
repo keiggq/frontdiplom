@@ -1,48 +1,78 @@
-
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';        
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { DocumentService } from '../../../core/services/document.service';
-import { DocumentDto, CommentDto, CommentCreateDto } from '../../../shared/models';
-
+import { AuthService } from '../../../core/services/auth.service';
+import { DocumentDto } from '../../../shared/models';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-document-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],   
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './document-list.component.html'
 })
 export class DocumentListComponent implements OnInit {
-  documents: DocumentDto[] = [];
-  searchTerm: string = '';
-  today = new Date().toISOString().split('T')[0];
 
-  constructor(private documentService: DocumentService) {}
+  documents: DocumentDto[] = [];
+  activeTab: 'all' | 'DRAFT' | 'CREATED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | 'ARCHIVED' | 'EXPIRED' = 'all';
+  isAdmin = false;
+  currentUserId: number = 0;
+  today = new Date().toISOString().split('T')[0];
+  searchTerm: string = '';
+
+  constructor(
+    private documentService: DocumentService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit() {
-    this.loadDocuments();
+    this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        this.currentUserId = user.id;
+        this.isAdmin = user.role === 'ADMIN' || user.role === 'ROLE_ADMIN';
+        this.loadDocuments();
+      }
+    });
   }
 
   loadDocuments() {
     this.documentService.getAll().subscribe({
-      next: (data) => {
-        this.documents = Array.isArray(data) ? data : (data.content || []);
+      next: (data: any) => {
+        this.documents = Array.isArray(data) ? data : (data?.content || []);
       },
-      error: (err) => console.error('Ошибка загрузки документов', err)
+      error: (err) => console.error(err)
     });
   }
 
+  setTab(tab: 'all' | 'DRAFT' | 'CREATED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | 'ARCHIVED' | 'EXPIRED') {
+    this.activeTab = tab;
+  }
+
+  // Поиск в реальном времени
   search() {
-    if (!this.searchTerm.trim()) {
-      this.loadDocuments();
-      return;
+    // Ничего не делаем — поиск работает автоматически через getFilteredDocuments()
+  }
+
+  getFilteredDocuments() {
+    let filtered = this.documents;
+
+    // Фильтрация по статусу (вкладки)
+    if (this.activeTab !== 'all') {
+      filtered = filtered.filter(doc => doc.status === this.activeTab);
     }
 
-    this.documentService.search(this.searchTerm).subscribe({
-      next: (data) => this.documents = data,
-      error: (err) => console.error(err)
-    });
+    // Поиск по названию или номеру
+    if (this.searchTerm.trim()) {
+      const term = this.searchTerm.toLowerCase().trim();
+      filtered = filtered.filter(doc => 
+        (doc.title && doc.title.toLowerCase().includes(term)) ||
+        (doc.registrationNumber && doc.registrationNumber.toLowerCase().includes(term))
+      );
+    }
+
+    return filtered;
   }
 
   downloadDocument(id: number, fileName: string) {
@@ -51,22 +81,36 @@ export class DocumentListComponent implements OnInit {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = fileName;
+        a.download = fileName || 'document';
         a.click();
         window.URL.revokeObjectURL(url);
       },
-      error: (err) => console.error('Ошибка скачивания', err)
+      error: () => Swal.fire('Ошибка', 'Не удалось скачать файл', 'error')
     });
+  }
+
+  getStatusName(status: string): string {
+    const names: any = {
+      'DRAFT': 'Черновик',
+      'CREATED': 'Создан',
+      'UNDER_REVIEW': 'На рассмотрении',
+      'APPROVED': 'Утвержден',
+      'REJECTED': 'Отклонен',
+      'ARCHIVED': 'В архиве',
+      'EXPIRED': 'Просрочен'
+    };
+    return names[status] || status;
   }
 
   getStatusClass(status: string): string {
     const classes: any = {
+      'DRAFT': 'bg-secondary',
       'CREATED': 'bg-primary',
-      'APPROVED': 'bg-success',
       'UNDER_REVIEW': 'bg-warning',
-      'EXPIRED': 'bg-danger',
-      'REJECTED': 'bg-dark',
-      'ARCHIVED': 'bg-secondary'
+      'APPROVED': 'bg-success',
+      'REJECTED': 'bg-danger',
+      'ARCHIVED': 'bg-dark',
+      'EXPIRED': 'bg-danger'
     };
     return classes[status] || 'bg-secondary';
   }
