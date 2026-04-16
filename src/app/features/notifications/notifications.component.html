@@ -1,0 +1,58 @@
+<div class="container-fluid mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-title">🛎️ Уведомления</h2>
+    
+    <div class="d-flex gap-3">
+      <button class="btn btn-outline-secondary" (click)="markAllAsRead()">
+        Отметить все как прочитанные
+      </button>
+      <button class="btn btn-outline-danger" (click)="clearAll()">
+        Очистить все
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body p-0">
+      <div *ngIf="notifications.length === 0" class="text-center py-5 text-muted">
+        <i class="bi bi-bell fs-1 mb-3"></i>
+        <h5>Нет уведомлений</h5>
+        <p class="mb-0">Здесь будут появляться важные события</p>
+      </div>
+
+      <div class="list-group list-group-flush" *ngIf="notifications.length > 0">
+        <div *ngFor="let notif of notifications" 
+             class="list-group-item list-group-item-action d-flex justify-content-between align-items-start p-4"
+             [class.bg-light]="!notif.read">
+          
+          <div class="flex-grow-1">
+            <div class="d-flex align-items-center gap-3">
+              <span class="fs-4" 
+                    [class.text-success]="notif.type === 'success'"
+                    [class.text-warning]="notif.type === 'warning'"
+                    [class.text-danger]="notif.type === 'error'">
+                <i class="bi" 
+                   [class.bi-check-circle]="notif.type === 'success'"
+                   [class.bi-exclamation-triangle]="notif.type === 'warning'"
+                   [class.bi-x-circle]="notif.type === 'error'"></i>
+              </span>
+              <div>
+                <h6 class="mb-1">{{ notif.title }}</h6>
+                <p class="mb-2 text-muted">{{ notif.message }}</p>
+                <small class="text-muted">{{ notif.date | date:'dd.MM.yyyy HH:mm' }}</small>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <button *ngIf="!notif.read" 
+                    class="btn btn-sm btn-outline-primary"
+                    (click)="markAsRead(notif.id)">
+              Отметить
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -12,6 +12,7 @@ import Swal from 'sweetalert2';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './document-list.component.html'
+  
 })
 export class DocumentListComponent implements OnInit {
 
@@ -21,6 +22,7 @@ export class DocumentListComponent implements OnInit {
   currentUserId: number = 0;
   today = new Date().toISOString().split('T')[0];
   searchTerm: string = '';
+  viewMode: 'kanban' | 'list' = 'kanban';
 
   constructor(
     private documentService: DocumentService,
@@ -36,6 +38,11 @@ export class DocumentListComponent implements OnInit {
       }
     });
   }
+  get draftCount() { return this.documents.filter(d => d.status === 'DRAFT').length; }
+  get underReviewCount() { return this.documents.filter(d => d.status === 'UNDER_REVIEW').length; }
+  get approvedCount() { return this.documents.filter(d => d.status === 'APPROVED').length; }
+  get rejectedCount() { return this.documents.filter(d => d.status === 'REJECTED').length; }
+  get expiredCount() { return this.documents.filter(d => d.status === 'EXPIRED').length; }
 
   loadDocuments() {
     this.documentService.getAll().subscribe({
@@ -113,5 +120,9 @@ export class DocumentListComponent implements OnInit {
       'EXPIRED': 'bg-danger'
     };
     return classes[status] || 'bg-secondary';
+  }
+  getDocumentsByStatus(status: string) {
+    if (status === 'all') return this.documents;
+    return this.documents.filter(doc => doc.status === status);
   }
 }

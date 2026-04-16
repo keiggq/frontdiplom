@@ -15,6 +15,15 @@
       <a class="nav-link fw-medium" routerLink="/comments" routerLinkActive="active">
         Комментарии
       </a>
+     <a class="nav-link fw-medium position-relative" 
+         routerLink="/notifications" 
+         routerLinkActive="active">
+        Уведомления
+        <span *ngIf="unreadCount > 0" 
+              class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+          {{ unreadCount }}
+        </span>
+      </a>
     </div>
 
     <div class="d-flex align-items-center gap-3 position-absolute end-0 me-4">
@@ -25,6 +34,7 @@
     </div>
   </div>
 </nav>
+
 
 <div class="pt-5 mt-5">
   <div class="container-fluid">

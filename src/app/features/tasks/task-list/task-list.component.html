@@ -1,5 +1,4 @@
 <h2 class="page-title">✅ Задачи</h2>
-<!-- Блок сортировки -->
 <div class="d-flex gap-3 mb-4">
   <div>
     <label class="form-label small text-muted">Сортировать по</label>
@@ -22,7 +21,6 @@
     {{ sortDirection === 'desc' ? '↓ По убыванию' : '↑ По возрастанию' }}
   </button>
 </div>
-
 <!-- Горизонтальные вкладки -->
 <div class="d-flex flex-wrap gap-2 mb-4">
   <button class="btn" 
@@ -108,17 +106,28 @@
             {{ task.dueDate | date:'dd.MM.yyyy' }}
           </td>
           <td class="text-end">
-            <select class="form-select form-select-sm d-inline w-auto me-2" 
-                    (change)="updateStatus(task.id, $any($event.target).value)"
-                    [disabled]="!isAdmin && task.status === 'COMPLETED'">
-              <option *ngIf="!isAdmin" value="NEW" [selected]="task.status === 'NEW'">Новая</option>
-              <option *ngIf="!isAdmin" value="IN_PROGRESS" [selected]="task.status === 'IN_PROGRESS'">В работе</option>
-              <option *ngIf="!isAdmin" value="COMPLETED" [selected]="task.status === 'COMPLETED'">Выполнено</option>
 
-              <option *ngIf="isAdmin" value="IN_REVIEW" [selected]="task.adminStatus === 'IN_REVIEW'">В обработке</option>
-              <option *ngIf="isAdmin" value="AGREED" [selected]="task.adminStatus === 'AGREED'">Согласовано</option>
-              <option *ngIf="isAdmin" value="REVISION" [selected]="task.adminStatus === 'REVISION'">На доработку</option>
-            </select>
+            <!-- Универсальная кнопка для обычного пользователя -->
+            <button *ngIf="!isAdmin" 
+                    class="btn btn-sm me-3"
+                    [class.btn-primary]="task.status === 'NEW'"
+                    [class.btn-success]="task.status === 'IN_PROGRESS'"
+                    (click)="handleUserAction(task)">
+              {{ task.status === 'NEW' ? 'Взять в работу' : 'Завершить' }}
+            </button>
+
+            <!-- Действия для админа -->
+            <button *ngIf="isAdmin" 
+                    class="btn btn-sm btn-success me-2"
+                    (click)="updateStatus(task.id, 'AGREED')">
+              Согласовано
+            </button>
+
+            <button *ngIf="isAdmin" 
+                    class="btn btn-sm btn-warning me-2"
+                    (click)="openRevisionModal(task.id)">
+              На доработку
+            </button>
 
             <button *ngIf="isAdmin" 
                     class="btn btn-sm btn-outline-danger me-1"
@@ -140,5 +149,74 @@
         </tr>
       </tbody>
     </table>
+  </div>
+</div>
+
+<!-- Модальное окно завершения задачи (для пользователя) -->
+<div *ngIf="showCompletionModal" class="modal fade show" style="display: block; background: rgba(0,0,0,0.6); z-index: 1050;">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Завершение задачи</h5>
+        <button type="button" class="btn-close" (click)="closeCompletionModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Описание выполненной работы *</label>
+          <textarea class="form-control" rows="5" 
+                    [(ngModel)]="completionReport"
+                    placeholder="Опишите подробно, что было сделано..."></textarea>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Прикрепить исправленный документ (необязательно)</label>
+          <input type="file" class="form-control" (change)="onFileSelected($event)" 
+                 accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg">
+          <small class="text-muted">Файл не сохраняется в базу данных, только для отчёта</small>
+        </div>
+
+        <div *ngIf="selectedCompletionFile" class="alert alert-info d-flex justify-content-between align-items-center">
+          <span>Прикреплён файл: <strong>{{ selectedCompletionFile.name }}</strong></span>
+          <button class="btn btn-sm btn-outline-secondary" (click)="downloadCompletionFile()">
+            Скачать
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeCompletionModal()">Отмена</button>
+        <button type="button" class="btn btn-success" 
+                (click)="submitCompletion()"
+                [disabled]="!completionReport.trim()">
+          Завершить задачу
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно "На доработку" (для админа) -->
+<div *ngIf="showRevisionModal" class="modal fade show" style="display: block; background: rgba(0,0,0,0.6); z-index: 1050;">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Отправить на доработку</h5>
+        <button type="button" class="btn-close" (click)="closeRevisionModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Комментарий для исполнителя</label>
+          <textarea class="form-control" rows="4" 
+                    [(ngModel)]="revisionComment"
+                    placeholder="Укажите, что нужно доработать..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeRevisionModal()">Отмена</button>
+        <button type="button" class="btn btn-warning" 
+                (click)="submitRevision()">
+          Отправить на доработку
+        </button>
+      </div>
+    </div>
   </div>
 </div>

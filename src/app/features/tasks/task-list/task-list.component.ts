@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TaskService } from '../../../core/services/task.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { TaskDto } from '../../../shared/models';
 import Swal from 'sweetalert2';
 
@@ -24,11 +25,17 @@ export class TaskListComponent implements OnInit {
   showTaskModal = false;
   sortBy: 'priority' | 'dueDate' = 'dueDate';
   sortDirection: 'asc' | 'desc' = 'desc';   // desc = от высокого/позднего к низкому/раннему
+  showRevisionModal = false;
+  revisionComment: string = '';
+  revisionTaskId: number | null = null;
+  
+  
 
   constructor(
     private taskService: TaskService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit() {
@@ -69,6 +76,12 @@ export class TaskListComponent implements OnInit {
     }
     this.applySorting();
   }
+
+  // Отдельный метод для кнопки "По возрастанию / По убыванию"
+  toggleSortDirection() {
+    this.sortDirection = this.sortDirection === 'desc' ? 'asc' : 'desc';
+    this.applySorting();
+  }
   openTaskDetail(taskId: number) {
     this.router.navigate(['/tasks', taskId]);
   }
@@ -103,16 +116,23 @@ export class TaskListComponent implements OnInit {
   getFilteredTasks() {
     let filtered = this.tasks;
 
-    // Фильтр по вкладкам (для обычного пользователя)
-    if (!this.isAdmin && this.activeTab !== 'all') {
-      filtered = filtered.filter(task => {
-        if (this.activeTab === 'in_progress') return task.status === 'IN_PROGRESS';
-        if (this.activeTab === 'overdue') return task.dueDate && task.dueDate < this.today;
-        if (this.activeTab === 'in_review') return task.adminStatus === 'IN_REVIEW';
-        if (this.activeTab === 'revision') return task.adminStatus === 'REVISION';
-        if (this.activeTab === 'agreed') return task.adminStatus === 'AGREED';
-        return true;
-      });
+    // Фильтрация по вкладкам — теперь работает и для админа
+    if (this.activeTab !== 'all') {
+      if (this.activeTab === 'in_progress') {
+        filtered = filtered.filter(task => task.status === 'IN_PROGRESS');
+      } 
+      else if (this.activeTab === 'overdue') {
+        filtered = filtered.filter(task => task.dueDate && task.dueDate < this.today);
+      } 
+      else if (this.activeTab === 'in_review') {
+        filtered = filtered.filter(task => task.adminStatus === 'IN_REVIEW');
+      } 
+      else if (this.activeTab === 'agreed') {
+        filtered = filtered.filter(task => task.adminStatus === 'AGREED');
+      } 
+      else if (this.activeTab === 'revision') {
+        filtered = filtered.filter(task => task.adminStatus === 'REVISION');
+      }
     }
 
     return filtered;
@@ -217,6 +237,27 @@ export class TaskListComponent implements OnInit {
       }
     });
   }
+  // Уведомления
+  showNotifications = false;
+  notifications: any[] = [];
+  unreadCount = 0;
+
+  toggleNotifications() {
+    this.showNotifications = !this.showNotifications;
+  }
+
+  markAsRead(id: number) {
+    // Логика отметки уведомления как прочитанного
+    this.notifications = this.notifications.map(n => 
+      n.id === id ? { ...n, read: true } : n
+    );
+    this.unreadCount = this.notifications.filter(n => !n.read).length;
+  }
+  markAllAsRead() {
+    this.notifications = this.notifications.map(n => ({ ...n, read: true }));
+    this.unreadCount = 0;
+  }
+  
 
   goBack() {
     this.router.navigate(['/dashboard']);
@@ -274,4 +315,128 @@ export class TaskListComponent implements OnInit {
     this.showTaskModal = false;
     this.selectedTask = null;
   }
+  // Для модального окна завершения задачи
+  showCompletionModal = false;
+  selectedTaskId: number | null = null;
+  completionReport: string = '';
+  selectedCompletionFile: File | null = null;
+
+  // Открыть модальное окно завершения
+  openCompletionModal(taskId: number) {
+    this.selectedTaskId = taskId;
+    this.completionReport = '';
+    this.selectedCompletionFile = null;
+    this.showCompletionModal = true;
+  }
+
+  closeCompletionModal() {
+    this.showCompletionModal = false;
+    this.selectedTaskId = null;
+    this.completionReport = '';
+    this.selectedCompletionFile = null;
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedCompletionFile = file;
+    }
+  }
+
+  downloadCompletionFile() {
+    if (!this.selectedCompletionFile) return;
+    const url = window.URL.createObjectURL(this.selectedCompletionFile);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = this.selectedCompletionFile.name;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  submitCompletion() {
+    if (this.selectedTaskId === null || !this.completionReport.trim()) {
+      Swal.fire('Ошибка', 'Описание выполненной работы обязательно', 'warning');
+      return;
+    }
+
+    const taskId = this.selectedTaskId;
+    const task = this.tasks.find(t => t.id === taskId);
+
+    this.taskService.updateStatus(taskId, 'COMPLETED').subscribe({
+      next: () => {
+        Swal.fire('Задача завершена', 'Отчёт успешно сохранён', 'success');
+
+        // Уведомление ТОЛЬКО АДМИНУ
+        if (task) {
+          this.notificationService.addNotification(
+            'Задача завершена пользователем',
+            `Пользователь завершил задачу: "${task.title}"`,
+            'success',
+            taskId,
+            null as any   // <-- это решает ошибку типа
+          );
+        }
+
+        this.closeCompletionModal();
+        this.loadTasks();
+      },
+      error: () => Swal.fire('Ошибка', 'Не удалось завершить задачу', 'error')
+    });
+  }
+
+  openRevisionModal(taskId: number) {
+    this.revisionTaskId = taskId;
+    this.revisionComment = '';
+    this.showRevisionModal = true;
+  }
+
+  closeRevisionModal() {
+    this.showRevisionModal = false;
+    this.revisionTaskId = null;
+  }
+
+  submitRevision() {
+    if (this.revisionTaskId === null) return;
+
+    const taskId = this.revisionTaskId;
+    const task = this.tasks.find(t => t.id === taskId);
+
+    if (!task) return;
+
+    // 1. Сбрасываем статус пользователя на "Новая"
+    this.taskService.updateStatus(taskId, 'NEW').subscribe({
+      next: () => {
+        // 2. Ставим админу статус "REVISION"
+        this.taskService.updateStatus(taskId, 'REVISION').subscribe({
+          next: () => {
+            Swal.fire('Отправлено на доработку', 'Статус пользователя сброшен на "Новая"', 'success');
+
+            // Уведомление только исполнителю задачи
+            if (task.assigneeId) {
+              this.notificationService.addNotification(
+                'Задача возвращена на доработку',
+                `Задача "${task.title}" отправлена администратором на доработку.`,
+                'warning',
+                taskId,
+                task.assigneeId
+              );
+            }
+
+            this.closeRevisionModal();
+            this.loadTasks();
+          },
+          error: () => Swal.fire('Ошибка', 'Не удалось поставить REVISION', 'error')
+        });
+      },
+      error: () => Swal.fire('Ошибка', 'Не удалось сбросить статус на NEW', 'error')
+    });
+  }
+  handleUserAction(task: TaskDto) {
+    if (task.status === 'NEW') {
+      this.updateStatus(task.id, 'IN_PROGRESS');
+    } else if (task.status === 'IN_PROGRESS') {
+      this.openCompletionModal(task.id);
+    }
+  }
+  
 }

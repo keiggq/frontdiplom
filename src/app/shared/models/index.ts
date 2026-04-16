@@ -54,12 +54,23 @@ export interface TaskDto {
   completedDate?: string;
   adminStatus?: string;
   assigneeName: string;
+  completionReport?: string;        // описание выполненной работы
+  completionFileName?: string;      // имя прикреплённого файла
   assigneeId: number;
   creatorName: string;
   creatorId: number;
   documentId?: number;
   documentTitle?: string;
   relatedTasks?: TaskDto[];
+}
+export interface TaskCreateDto {
+  title: string;
+  description?: string;
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  dueDate: string;
+  assigneeId: number;
+  creatorId?: number;
+  documentId?: number | null;
 }
 
 // ====================== COMMENT ======================

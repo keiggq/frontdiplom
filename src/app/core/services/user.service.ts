@@ -9,7 +9,6 @@ export class UserService {
 
   constructor(private http: HttpClient) {}
 
-  // Получить всех пользователей (для выпадающего списка)
   getAllUsers(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl);
   }

@@ -3,7 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TaskService } from '../../../core/services/task.service';
+import { UserService } from '../../../core/services/user.service';
+import { DocumentService } from '../../../core/services/document.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { TaskCreateDto } from '../../../shared/models';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -14,58 +17,80 @@ import Swal from 'sweetalert2';
 })
 export class TaskCreateComponent implements OnInit {
 
-  task: any = {
+  task: TaskCreateDto = {
     title: '',
     description: '',
     priority: 'MEDIUM',
     dueDate: '',
-    assigneeId: null,
+    assigneeId: 0,
     documentId: null
   };
 
-  isSubmitting = false;
+  users: any[] = [];           // список пользователей
+  documents: any[] = [];       // список документов
+  currentUserId: number = 0;
+  isLoadingUsers = true;
 
   constructor(
     private taskService: TaskService,
+    private userService: UserService,
+    private documentService: DocumentService,
     private authService: AuthService,
     private router: Router
   ) {}
 
   ngOnInit() {
-    const userId = this.authService.getCurrentUserId();
-    if (userId) {
-      this.task.creatorId = userId;
-    }
+    this.authService.currentUser$.subscribe(user => {
+      if (user) this.currentUserId = user.id;
+    });
 
-    // Проверка: если не админ — перенаправляем обратно
-    if (!this.authService.isAdmin()) {
-      Swal.fire({
-        title: 'Доступ запрещён',
-        text: 'Создавать задачи может только администратор',
-        icon: 'error'
-      });
-      this.router.navigate(['/tasks']);
-    }
+    this.loadUsers();
+    this.loadDocuments();
+  }
+
+  loadUsers() {
+    this.isLoadingUsers = true;
+    this.userService.getAllUsers().subscribe({
+      next: (data) => {
+        this.users = data;
+        this.isLoadingUsers = false;
+      },
+      error: (err) => {
+        console.error('Ошибка загрузки пользователей', err);
+        this.isLoadingUsers = false;
+        Swal.fire('Ошибка', 'Не удалось загрузить список пользователей', 'error');
+      }
+    });
+  }
+
+  loadDocuments() {
+    this.documentService.getAll().subscribe({
+      next: (data: any) => {
+        this.documents = Array.isArray(data) ? data : (data?.content || []);
+      },
+      error: (err) => console.error('Ошибка загрузки документов', err)
+    });
   }
 
   createTask() {
-    if (!this.task.title || !this.task.dueDate || !this.task.assigneeId) {
-      Swal.fire('Ошибка', 'Заполните обязательные поля', 'warning');
+    if (!this.task.title || this.task.assigneeId === 0) {
+      Swal.fire('Ошибка', 'Название задачи и исполнитель обязательны', 'error');
       return;
     }
 
-    this.isSubmitting = true;
+    this.task.creatorId = this.currentUserId;
 
     this.taskService.create(this.task).subscribe({
       next: () => {
-        this.isSubmitting = false;
-        Swal.fire('Успех', 'Задача создана!', 'success');
+        Swal.fire('Успех', 'Задача успешно создана!', 'success');
         this.router.navigate(['/tasks']);
       },
       error: (err) => {
-        this.isSubmitting = false;
         Swal.fire('Ошибка', err.error?.message || 'Не удалось создать задачу', 'error');
       }
     });
+  }
+  cancel() {
+    this.router.navigate(['/tasks']);
   }
 }

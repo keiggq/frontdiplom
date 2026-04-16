@@ -13,11 +13,13 @@ import { TaskListComponent } from './features/tasks/task-list/task-list.componen
 import { TaskCreateComponent } from './features/tasks/task-create/task-create.component';
 import { CommentListComponent } from './features/comments/comment-list/comment-list.component';
 import { TaskDetailComponent } from './features/tasks/task-detail/task-detail.component';
+import { NotificationsComponent } from './features/notifications/notifications.component';
 
 export const routes: Routes = [
   // Публичные маршруты (без layout)
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+ 
 
   // Защищенные маршруты (с layout)
   {
@@ -39,7 +41,9 @@ export const routes: Routes = [
       { path: 'tasks/:id', component: TaskDetailComponent },
       
       // Комментарии
-      { path: 'comments', component: CommentListComponent }
+      { path: 'comments', component: CommentListComponent },
+      
+      { path: 'notifications', component: NotificationsComponent }
     ]
   },
 
