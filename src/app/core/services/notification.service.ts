@@ -13,6 +13,7 @@ export interface Notification {
   link?: string;
   taskId?: number;
   userId?: number | null        // ← Важное поле: кому предназначено уведомление
+  extraData?: any;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -31,7 +32,8 @@ export class NotificationService {
     message: string, 
     type: 'success' | 'info' | 'warning' | 'error' = 'info', 
     taskId?: number,
-    targetUserId?: number   // null = всем, или конкретный ID
+    targetUserId?: number,   // null = всем, или конкретный ID
+    extraData?: any
   ) {
     const notification: Notification = {
       id: Date.now(),
@@ -41,7 +43,8 @@ export class NotificationService {
       date: new Date(),
       read: false,
       taskId,
-      userId: targetUserId
+      userId: targetUserId,
+      extraData
     };
 
     const current = this.notifications.value;

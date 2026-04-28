@@ -41,6 +41,7 @@ export interface DocumentDto {
   departmentName?: string;
   keywords?: string;
   version: string;
+  visibleToUserIds?: number[];
 }
 
 // ====================== TASK ======================

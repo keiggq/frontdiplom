@@ -6,6 +6,7 @@ import { TaskService } from '../../../core/services/task.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { TaskDto } from '../../../shared/models';
+import { DocumentService } from '../../../core/services/document.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -35,7 +36,8 @@ export class TaskListComponent implements OnInit {
     private taskService: TaskService,
     private authService: AuthService,
     private router: Router,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private documentService: DocumentService
   ) {}
 
   ngOnInit() {
@@ -364,17 +366,64 @@ export class TaskListComponent implements OnInit {
 
     this.taskService.updateStatus(taskId, 'COMPLETED').subscribe({
       next: () => {
-        Swal.fire('Задача завершена', 'Отчёт успешно сохранён', 'success');
+        Swal.fire('Задача завершена', 'Статус обновлён', 'success');
 
-        // Уведомление ТОЛЬКО АДМИНУ
-        if (task) {
-          this.notificationService.addNotification(
-            'Задача завершена пользователем',
-            `Пользователь завершил задачу: "${task.title}"`,
-            'success',
-            taskId,
-            null as any   // <-- это решает ошибку типа
-          );
+        if (this.selectedCompletionFile) {
+          const formData = new FormData();
+
+          const documentDto = {
+            title: `Исправление по задаче: ${task?.title || 'Без названия'}`,
+            description: this.completionReport,
+            documentDate: new Date().toISOString().split('T')[0],
+            expiryDate: null,
+            authorId: this.currentUserId,
+            documentTypeId: null,
+            departmentId: null,
+            keywords: '',
+            version: '1.0',
+            visibleToUserIds: [this.currentUserId]   // Только автор + админ
+          };
+
+          formData.append('document', new Blob([JSON.stringify(documentDto)], { 
+            type: 'application/json' 
+          }));
+
+          formData.append('file', this.selectedCompletionFile);
+
+          this.documentService.createWithFile(formData).subscribe({
+            next: (newDoc) => {
+              console.log('Документ успешно создан:', newDoc);
+
+              // Уведомление только админу с ссылкой на документ
+              this.notificationService.addNotification(
+                'Новый черновик документа',
+                `Пользователь завершил задачу "${task?.title}" и загрузил исправленный документ.`,
+                'success',
+                taskId,
+                null as any,                                   // null = только админу
+                {
+                  documentId: newDoc.id,
+                  documentTitle: newDoc.title
+                }
+              );
+
+              Swal.fire({
+                title: 'Черновик создан',
+                text: `Документ "${newDoc.title}" сохранён как черновик`,
+                icon: 'success'
+              });
+            },
+            error: (err) => {
+              console.error('Ошибка создания документа:', err);
+              Swal.fire({
+                title: 'Предупреждение',
+                text: 'Задача завершена, но не удалось создать документ из файла',
+                icon: 'warning'
+              });
+            }
+          });
+        } else {
+          Swal.fire('Задача завершена', 'Отчёт успешно сохранён', 'success');
         }
 
         this.closeCompletionModal();
@@ -403,22 +452,20 @@ export class TaskListComponent implements OnInit {
 
     if (!task) return;
 
-    // 1. Сбрасываем статус пользователя на "Новая"
     this.taskService.updateStatus(taskId, 'NEW').subscribe({
       next: () => {
-        // 2. Ставим админу статус "REVISION"
         this.taskService.updateStatus(taskId, 'REVISION').subscribe({
           next: () => {
             Swal.fire('Отправлено на доработку', 'Статус пользователя сброшен на "Новая"', 'success');
 
-            // Уведомление только исполнителю задачи
             if (task.assigneeId) {
               this.notificationService.addNotification(
                 'Задача возвращена на доработку',
-                `Задача "${task.title}" отправлена администратором на доработку.`,
+                `Админ отправил задачу "${task.title}" на доработку.\n\nКомментарий: ${this.revisionComment || 'Без комментария'}`,
                 'warning',
                 taskId,
-                task.assigneeId
+                task.assigneeId,           // только исполнителю
+                { revisionComment: this.revisionComment }
               );
             }
 

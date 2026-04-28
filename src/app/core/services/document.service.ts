@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { DocumentDto } from '../../shared/models';
+import { Observable } from 'rxjs';
 
 const API_DOCUMENTS = 'http://localhost:8080/api/documents';
 
 @Injectable({ providedIn: 'root' })
 export class DocumentService {
+  private apiUrl = 'http://localhost:8080/api/documents';
 
   constructor(private http: HttpClient) {}
 
@@ -31,5 +33,11 @@ export class DocumentService {
     // Обновление статуса документа
   updateStatus(documentId: number, status: string) {
     return this.http.patch(`${API_DOCUMENTS}/${documentId}/status?status=${status}`, {});
+  }
+  setDocumentPermissions(documentId: number, userIds: number[]): Observable<any> {
+      return this.http.post(`${this.apiUrl}/${documentId}/permissions`, { userIds });
+  }
+  createWithFile(formData: FormData): Observable<DocumentDto> {
+    return this.http.post<DocumentDto>(this.apiUrl, formData);
   }
 }
