@@ -69,6 +69,7 @@ export class TaskListComponent implements OnInit {
       return this.sortDirection === 'desc' ? comparison : -comparison;
     });
   }
+
   toggleSort(field: 'priority' | 'dueDate') {
     if (this.sortBy === field) {
       this.sortDirection = this.sortDirection === 'desc' ? 'asc' : 'desc';
@@ -79,10 +80,10 @@ export class TaskListComponent implements OnInit {
     this.applySorting();
   }
 
-  // Отдельный метод для кнопки "По возрастанию / По убыванию"
+  // Исправленный метод — теперь точно работает
   toggleSortDirection() {
     this.sortDirection = this.sortDirection === 'desc' ? 'asc' : 'desc';
-    this.applySorting();
+    this.applySorting();           // применяем сортировку к this.tasks
   }
   openTaskDetail(taskId: number) {
     this.router.navigate(['/tasks', taskId]);
@@ -116,9 +117,9 @@ export class TaskListComponent implements OnInit {
   }
 
   getFilteredTasks() {
-    let filtered = this.tasks;
+    let filtered = [...this.tasks]; // копия массива
 
-    // Фильтрация по вкладкам — теперь работает и для админа
+    // Фильтрация по вкладкам
     if (this.activeTab !== 'all') {
       if (this.activeTab === 'in_progress') {
         filtered = filtered.filter(task => task.status === 'IN_PROGRESS');
@@ -136,6 +137,26 @@ export class TaskListComponent implements OnInit {
         filtered = filtered.filter(task => task.adminStatus === 'REVISION');
       }
     }
+
+    // Применяем текущую сортировку к отфильтрованному списку
+    filtered.sort((a, b) => {
+      let comparison = 0;
+
+      if (this.sortBy === 'priority') {
+        const priorityOrder: Record<string, number> = { 
+          'HIGH': 3, 
+          'MEDIUM': 2, 
+          'LOW': 1 
+        };
+        comparison = (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0);
+      } else if (this.sortBy === 'dueDate') {
+        const dateA = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+        const dateB = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+        comparison = dateB - dateA;
+      }
+
+      return this.sortDirection === 'desc' ? comparison : -comparison;
+    });
 
     return filtered;
   }

@@ -88,4 +88,7 @@ export class DocumentCreateComponent implements OnInit {
       }
     });
   }
+  cancel() {
+    this.router.navigate(['/documents']);
+  }
 }
